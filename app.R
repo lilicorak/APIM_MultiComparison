@@ -218,17 +218,17 @@ server <- function(input, output, session) {
   })
   
   output$overviewMean <- renderPlot({
-    ggplot(overviewDataFile()) + geom_col(aes(x=PROV_RES, y= MEAN, fill = file), position = "dodge") + theme_classic() + scale_fill_jama() +
+    ggplot(overviewDataFile()) + geom_col(aes(x=PROV_RES, y= MEAN, fill = file), width=0.8, position = "dodge") + theme_classic() + scale_fill_jama() +
       scale_y_continuous(labels = comma) + theme(legend.position = "bottom") + labs(title="Mean by province and file")
   })
   
   output$overviewNGWT <- renderPlot({
-    ggplot(overviewDataFile()) + geom_col(aes(x=PROV_RES, y= NWGT, fill = file), position = "dodge") + theme_classic() + scale_fill_jama() +
+    ggplot(overviewDataFile()) + geom_col(aes(x=PROV_RES, y= NWGT, fill = file), width=0.8, position = "dodge") + theme_classic() + scale_fill_jama() +
       scale_y_continuous(labels = comma) + theme(legend.position = "bottom") + labs(title="NWGT by province and file")
   })
 
   output$overviewP50 <- renderPlot({
-    ggplot(overviewDataFile()) + geom_col(aes(x=PROV_RES, y= P_50, fill = file), position = "dodge") + theme_classic() + scale_fill_jama() +
+    ggplot(overviewDataFile()) + geom_col(aes(x=PROV_RES, y= P_50, fill = file), width=0.8, position = "dodge") + theme_classic() + scale_fill_jama() +
       scale_y_continuous(labels = comma) + theme(legend.position = "bottom") + labs(title="P_50 by province and file")
   })
   
