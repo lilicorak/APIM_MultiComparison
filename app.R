@@ -14,7 +14,7 @@ require(ggsci)
 read_data <- function (filename) {
   dat <- subset(read.csv(paste0("data/", filename, ".csv"), head=T, sep=","), 
                 select = c("year", "FILE", "PROV_RES", "VAR", "CLASS_FLAG", "SEX", "AGE", "WITH_VAL_0", "N", "MEAN", "NWGT", "SUM", 
-                           "P75", "P25", "P_0", "P_10", "P_20", "P_30", "P_40", "P_50", "P_60", "P_70", "P_80", "P_90", "P_100"))
+                           "P25", "P75", "P_0", "P_10", "P_20", "P_30", "P_40", "P_50", "P_60", "P_70", "P_80", "P_90", "P_100"))
   
   dat$CLASS_FLAG <- factor(dat$CLASS_FLAG, levels = c("ALL", "1", "2", "3", "4", "5"))
   dat$PROV_RES <- factor(dat$PROV_RES, levels = c("ALL", "NL", "PE", "NS", "NB", "QC", "ON", "MB", "SK", "AB", "BC", "YT", "NT", "NU"))
@@ -40,7 +40,8 @@ ui <- (fluidPage(
       ".navbar-default .navbar-brand {color: #666666;}
       .navbar-default .navbar-brand:hover {color: #666666;}
       .btn {-webkit-box-shadow: none; box-shadow: none; position: relative;}
-      .box-header .box-title {font-size: 14px;}"
+      .box-header .box-title {font-size: 14px;}
+      .box.box-info {border-top-color: #2196f3;}"
     )
   ),
   navbarPage(
@@ -76,7 +77,11 @@ ui <- (fluidPage(
                              "Province of residence:",
                              choices = unique(APIM$PROV_RES),
                              selected = unique(APIM$PROV_RES),
-                             multiple = T)
+                             multiple = T),
+                 actionButton("overviewUpdate",
+                              label = "Update",
+                              width = "100%",
+                              class = "btn btn-primary btn-custom")
                ),
                mainPanel(
                  width = 10,
@@ -122,7 +127,11 @@ ui <- (fluidPage(
                  selectInput("percentileProv",
                              "Province of residence:",
                              choices = unique(APIM$PROV_RES),
-                             selected = "ALL")
+                             selected = "ALL"),
+                 actionButton("percentileUpdate",
+                              label = "Update",
+                              width = "100%",
+                              class = "btn btn-primary btn-custom")
                ),
                mainPanel(
                  width = 10,
@@ -175,7 +184,11 @@ ui <- (fluidPage(
                  selectInput("demoProv",
                              "Province of residence:",
                              choices = unique(APIM$PROV_RES),
-                             selected = "ALL")
+                             selected = "ALL"),
+                 actionButton("demoUpdate",
+                              label = "Update",
+                              width = "100%",
+                              class = "btn btn-primary btn-custom")
                  ),
                mainPanel(
                  width = 10,
@@ -224,40 +237,44 @@ server <- function(input, output, session) {
   })
   
   output$overviewMean <- renderPlot({
-    ggplot(overviewDataFile()) + 
-      geom_col(aes(x=PROV_RES, y= MEAN, fill = FILE), width=0.8, position = "dodge") + 
-      theme_classic() + 
-      scale_fill_jama() +
-      scale_y_continuous(labels = comma) + 
-      theme(legend.position = "bottom") + 
-      labs(title=paste0("Mean by province and file, ", input$overviewVar), fill = NULL)
+    input$overviewUpdate
+    isolate({ggplot(overviewDataFile()) + 
+              geom_col(aes(x=PROV_RES, y= MEAN, fill = FILE), width=0.8, position = "dodge") + 
+              theme_classic() + 
+              scale_fill_jama() +
+              scale_y_continuous(labels = comma) + 
+              theme(legend.position = "bottom") + 
+              labs(title=paste0("Mean by province and file, ", input$overviewVar), fill = NULL)})
   })
   
   output$overviewNGWT <- renderPlot({
-    ggplot(overviewDataFile()) + 
-      geom_col(aes(x=PROV_RES, y= NWGT, fill = FILE), width=0.8, position = "dodge") + 
-      theme_classic() + 
-      scale_fill_jama() +
-      scale_y_continuous(labels = comma) + 
-      theme(legend.position = "bottom") + 
-      labs(title=paste0("NWGT by province and file, ", input$overviewVar), fill = NULL)
+    input$overviewUpdate
+    isolate({ggplot(overviewDataFile()) + 
+              geom_col(aes(x=PROV_RES, y= NWGT, fill = FILE), width=0.8, position = "dodge") + 
+              theme_classic() + 
+              scale_fill_jama() +
+              scale_y_continuous(labels = comma) + 
+              theme(legend.position = "bottom") + 
+              labs(title=paste0("NWGT by province and file, ", input$overviewVar), fill = NULL)})
   })
 
   output$overviewP50 <- renderPlot({
-    ggplot(overviewDataFile()) + 
-      geom_col(aes(x=PROV_RES, y= P_50, fill = FILE), width=0.8, position = "dodge") + 
-      theme_classic() + 
-      scale_fill_jama() +
-      scale_y_continuous(labels = comma) + 
-      theme(legend.position = "bottom") + 
-      labs(title=paste0("P_50 by province and file, ", input$overviewVar), fill = NULL)
+    input$overviewUpdate
+    isolate({ggplot(overviewDataFile()) + 
+              geom_col(aes(x=PROV_RES, y= P_50, fill = FILE), width=0.8, position = "dodge") + 
+              theme_classic() + 
+              scale_fill_jama() +
+              scale_y_continuous(labels = comma) + 
+              theme(legend.position = "bottom") + 
+              labs(title=paste0("P_50 by province and file, ", input$overviewVar), fill = NULL)})
   })
   
-  output$overviewData <- renderDT(
-    subset(overviewDataFile()[order(overviewDataFile()$PROV_RES),], select = c("PROV_RES", "FILE","N", "MEAN", "NWGT", "SUM", "P75", "P25", 
+  output$overviewData <- renderDataTable({
+    input$overviewUpdate
+    isolate({DT::datatable(subset(overviewDataFile()[order(overviewDataFile()$PROV_RES),], select = c("PROV_RES", "FILE","N", "MEAN", "NWGT", "SUM", "P25", "P75", 
                                           "P_0", "P_10", "P_20", "P_30", "P_40", "P_50", "P_60", "P_70", "P_80", "P_90", "P_100")), 
-                  options=list(paging = F, searching=F, scrollX = TRUE), rownames=F
-  )
+                            options=list(paging = F, searching=F, scrollX = TRUE, scrollY = "400px"), rownames=F)})
+  })
   
 ### Percentiles page
   
