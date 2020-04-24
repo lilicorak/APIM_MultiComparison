@@ -13,7 +13,7 @@ require(ggsci)
 # Read in the data
 read_data <- function (filename) {
   dat <- subset(read.csv(paste0("data/", filename, ".csv"), head=T, sep=","), 
-                select = c("year", "file", "PROV_RES", "VAR", "CLASS_FLAG", "SEX", "AGE", "WITH_VAL_0", "N", "MEAN", "NWGT", "SUM", 
+                select = c("year", "FILE", "PROV_RES", "VAR", "CLASS_FLAG", "SEX", "AGE", "WITH_VAL_0", "N", "MEAN", "NWGT", "SUM", 
                            "P75", "P25", "P_0", "P_10", "P_20", "P_30", "P_40", "P_50", "P_60", "P_70", "P_80", "P_90", "P_100"))
   
   dat$CLASS_FLAG <- factor(dat$CLASS_FLAG, levels = c("ALL", "1", "2", "3", "4", "5"))
@@ -218,22 +218,38 @@ server <- function(input, output, session) {
   })
   
   output$overviewMean <- renderPlot({
-    ggplot(overviewDataFile()) + geom_col(aes(x=PROV_RES, y= MEAN, fill = file), width=0.8, position = "dodge") + theme_classic() + scale_fill_jama() +
-      scale_y_continuous(labels = comma) + theme(legend.position = "bottom") + labs(title="Mean by province and file")
+    ggplot(overviewDataFile()) + 
+      geom_col(aes(x=PROV_RES, y= MEAN, fill = FILE), width=0.8, position = "dodge") + 
+      theme_classic() + 
+      scale_fill_jama() +
+      scale_y_continuous(labels = comma) + 
+      theme(legend.position = "bottom") + 
+      labs(title=paste0("Mean by province and file, ", input$overviewVar), fill = NULL)
   })
   
   output$overviewNGWT <- renderPlot({
-    ggplot(overviewDataFile()) + geom_col(aes(x=PROV_RES, y= NWGT, fill = file), width=0.8, position = "dodge") + theme_classic() + scale_fill_jama() +
-      scale_y_continuous(labels = comma) + theme(legend.position = "bottom") + labs(title="NWGT by province and file")
+    ggplot(overviewDataFile()) + 
+      geom_col(aes(x=PROV_RES, y= NWGT, fill = FILE), width=0.8, position = "dodge") + 
+      theme_classic() + 
+      scale_fill_jama() +
+      scale_y_continuous(labels = comma) + 
+      theme(legend.position = "bottom") + 
+      labs(title=paste0("NWGT by province and file, ", input$overviewVar), fill = NULL)
   })
 
   output$overviewP50 <- renderPlot({
-    ggplot(overviewDataFile()) + geom_col(aes(x=PROV_RES, y= P_50, fill = file), width=0.8, position = "dodge") + theme_classic() + scale_fill_jama() +
-      scale_y_continuous(labels = comma) + theme(legend.position = "bottom") + labs(title="P_50 by province and file")
+    ggplot(overviewDataFile()) + 
+      geom_col(aes(x=PROV_RES, y= P_50, fill = FILE), width=0.8, position = "dodge") + 
+      theme_classic() + 
+      scale_fill_jama() +
+      scale_y_continuous(labels = comma) + 
+      theme(legend.position = "bottom") + 
+      labs(title=paste0("P_50 by province and file, ", input$overviewVar), fill = NULL)
   })
   
   output$overviewData <- renderDT(
-    subset(overviewDataFile(), select = -c(SEX, AGE, WITH_VAL_0, CLASS_FLAG, year, VAR)), 
+    subset(overviewDataFile()[order(overviewDataFile()$PROV_RES),], select = c("PROV_RES", "FILE","N", "MEAN", "NWGT", "SUM", "P75", "P25", 
+                                          "P_0", "P_10", "P_20", "P_30", "P_40", "P_50", "P_60", "P_70", "P_80", "P_90", "P_100")), 
                   options=list(paging = F, searching=F, scrollX = TRUE), rownames=F
   )
   
