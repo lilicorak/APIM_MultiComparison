@@ -1,4 +1,4 @@
-#install.packages("dplyr", "shiny", "shinyWidgets", "ggplot2", "scales", "shinythemes", "shinydashboardPlus", "DT", "ggsci")
+#install.packages(c("dplyr", "shiny", "shinyWidgets", "ggplot2", "scales", "shinythemes", "shinydashboardPlus", "DT", "ggsci"))
 
 require(dplyr)
 require(shiny)
