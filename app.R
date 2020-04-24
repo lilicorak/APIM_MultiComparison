@@ -168,6 +168,10 @@ ui <- (fluidPage(
                              "Age group:",
                              choices = unique(APIM$AGE),
                              selected = "All"),
+                 selectInput("demoSex",
+                             "Sex:",
+                             choices = unique(APIM$SEX),
+                             selected = "ALL"),
                  selectInput("demoProv",
                              "Province of residence:",
                              choices = unique(APIM$PROV_RES),
@@ -176,16 +180,18 @@ ui <- (fluidPage(
                mainPanel(
                  width = 10,
                  fluidRow(
-                   column(5, wellPanel(p("years plot"),
-                                       plotOutput("demoYearPlot"))),
-                   column(7, wellPanel(p("age plot"),
+                   column(6, wellPanel(p("prov plot"),
+                                       plotOutput("demoProvPlot"))),
+                   column(6, wellPanel(p("age plot"),
                                        plotOutput("demoAgePlot")))
                  ),
                  fluidRow(
-                   column(7, wellPanel(p("prov plot"),
-                                       plotOutput("demoProvPlot"))),
-                   column(5, wellPanel(p("sex plot"),
-                                       plotOutput("demoSexPlot")))
+                   column(4, wellPanel(p("year plot"),
+                                       plotOutput("demoYearPlot"))),
+                   column(4, wellPanel(p("sex plot"),
+                                       plotOutput("demoSexPlot"))),
+                   column(4, wellPanel(p("class plot"),
+                                       plotOutput("demoClassPlot")))
                  ),
                  fluidRow(boxPlus(title = "demographic data table",
                                   closable= F,
