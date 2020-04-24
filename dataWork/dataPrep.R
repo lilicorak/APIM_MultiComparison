@@ -41,43 +41,43 @@ colnames(survey_combinations) <- vars
 # Create a couple years
 APIM_tab_2017 <- survey_combinations
 APIM_tab_2017$year <- 2017
-APIM_tab_2017$file <- "APIM"
+APIM_tab_2017$FILE <- "APIM"
 
 APIM_tab_2018 <- survey_combinations
 APIM_tab_2018$year <- 2018
-APIM_tab_2018$file <- "APIM"
+APIM_tab_2018$FILE <- "APIM"
 
 CHS_tab_2017 <- survey_combinations
 CHS_tab_2017$year <- 2017
-CHS_tab_2017$file <- "CHS"
+CHS_tab_2017$FILE <- "CHS"
 
 CHS_tab_2018 <- survey_combinations
 CHS_tab_2018$year <- 2018
-CHS_tab_2018$file <- "CHS"
+CHS_tab_2018$FILE <- "CHS"
 
 SHS_tab_2017 <- survey_combinations
 SHS_tab_2017$year <- 2017
-SHS_tab_2017$file <- "SHS"
+SHS_tab_2017$FILE <- "SHS"
 
 SHS_tab_2018 <- survey_combinations
 SHS_tab_2018$year <- 2018
-SHS_tab_2018$file <- "SHS"
+SHS_tab_2018$FILE <- "SHS"
 
 CIS_tab_2017 <- survey_combinations
 CIS_tab_2017$year <- 2017
-CIS_tab_2017$file <- "CIS"
+CIS_tab_2017$FILE <- "CIS"
 
 CIS_tab_2018 <- survey_combinations
 CIS_tab_2018$year <- 2018
-CIS_tab_2018$file <- "CIS"
+CIS_tab_2018$FILE <- "CIS"
 
 CISPlus_tab_2017 <- survey_combinations
 CISPlus_tab_2017$year <- 2017
-CISPlus_tab_2017$file <- "CISPlus"
+CISPlus_tab_2017$FILE <- "CISPlus"
 
 CISPlus_tab_2018 <- survey_combinations
 CISPlus_tab_2018$year <- 2018
-CISPlus_tab_2018$file <- "CISPlus"
+CISPlus_tab_2018$FILE <- "CISPlus"
 
 # Create columns for statistics
 for (i in stats) {
