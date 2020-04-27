@@ -244,7 +244,9 @@ server <- function(input, output, session) {
               scale_fill_jama() +
               scale_y_continuous(labels = comma) + 
               theme(legend.position = "bottom") + 
-              labs(title=paste0("Mean by province and file, ", input$overviewVar), fill = NULL)})
+              labs(title=paste0("Mean ", input$overviewVar, " by province and file, ", input$overviewYear), 
+                   fill = NULL,
+                   subtitle = paste0("Class: ", input$overviewClass, "; Age: ", input$overviewAge))})
   })
   
   output$overviewNGWT <- renderPlot({
@@ -255,7 +257,9 @@ server <- function(input, output, session) {
               scale_fill_jama() +
               scale_y_continuous(labels = comma) + 
               theme(legend.position = "bottom") + 
-              labs(title=paste0("NWGT by province and file, ", input$overviewVar), fill = NULL)})
+              labs(title=paste0("NWGT ", input$overviewVar, " by province and file, ", input$overviewYear), 
+                   fill = NULL,
+                   subtitle = paste0("Class: ", input$overviewClass, "; Age: ", input$overviewAge))})
   })
 
   output$overviewP50 <- renderPlot({
@@ -266,7 +270,9 @@ server <- function(input, output, session) {
               scale_fill_jama() +
               scale_y_continuous(labels = comma) + 
               theme(legend.position = "bottom") + 
-              labs(title=paste0("P_50 by province and file, ", input$overviewVar), fill = NULL)})
+              labs(title=paste0("P_50 ", input$overviewVar, " by province and file, ", input$overviewYear), 
+                   fill = NULL,
+                   subtitle = paste0("Class: ", input$overviewClass, "; Age: ", input$overviewAge))})
   })
   
   output$overviewData <- renderDataTable({
