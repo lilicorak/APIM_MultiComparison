@@ -1,4 +1,4 @@
-#install.packages(c("dplyr", "shiny", "shinyWidgets", "ggplot2", "scales", "shinythemes", "shinydashboardPlus", "DT", "ggsci"))
+#install.packages(c("dplyr", "shiny", "shinyWidgets", "ggplot2", "scales", "shinythemes", "shinydashboardPlus", "DT", "ggsci", "plotly", "ggiraph"))
 
 require(dplyr)
 require(shiny)
@@ -9,6 +9,7 @@ require(shinythemes)
 require(shinydashboardPlus)
 require(DT)
 require(ggsci)
+require(ggiraph)
 
 # Read in the data
 read_data <- function (filename) {
@@ -69,10 +70,14 @@ ui <- (fluidPage(
                              "Class flag:",
                              choices = unique(APIM$CLASS_FLAG),
                              selected = "ALL"),
-                 selectInput("overviewAge",
-                             "Age group:",
-                             choices = unique(APIM$AGE),
-                             selected = "All"),
+                 fluidRow(column(6, selectInput("overviewAge",
+                                                "Age group:",
+                                                choices = unique(APIM$AGE),
+                                                selected = "All")),
+                          column(6, selectInput("overviewSex",
+                                                "Sex:",
+                                                choices = unique(APIM$SEX),
+                                                selected = "ALL"))),
                  selectInput("overviewProv",
                              "Province of residence:",
                              choices = unique(APIM$PROV_RES),
@@ -85,9 +90,9 @@ ui <- (fluidPage(
                ),
                mainPanel(
                  width = 10,
-                 fluidRow(column(4, plotOutput("overviewMean")),
-                          column(4, plotOutput("overviewNGWT")),
-                          column(4, plotOutput("overviewP50"))),
+                 fluidRow(column(4, girafeOutput("overviewMean")),
+                          column(4, girafeOutput("overviewNGWT")),
+                          column(4, girafeOutput("overviewP50"))),
                  fluidRow(boxPlus(title = "Data table",
                                   closable= F,
                                   collapsible = T,
@@ -120,10 +125,14 @@ ui <- (fluidPage(
                              "Class flag:",
                              choices = unique(APIM$CLASS_FLAG),
                              selected = "ALL"),
-                 selectInput("percentileAge",
-                             "Age group:",
-                             choices = unique(APIM$AGE),
-                             selected = "All"),
+                 fluidRow(column(6, selectInput("overviewAge",
+                                                "Age group:",
+                                                choices = unique(APIM$AGE),
+                                                selected = "All")),
+                          column(6, selectInput("overviewSex",
+                                                "Sex:",
+                                                choices = unique(APIM$SEX),
+                                                selected = "ALL"))),
                  selectInput("percentileProv",
                              "Province of residence:",
                              choices = unique(APIM$PROV_RES),
@@ -173,14 +182,14 @@ ui <- (fluidPage(
                              "Class flag:",
                              choices = unique(APIM$CLASS_FLAG),
                              selected = "ALL"),
-                 selectInput("demoAge",
-                             "Age group:",
-                             choices = unique(APIM$AGE),
-                             selected = "All"),
-                 selectInput("demoSex",
-                             "Sex:",
-                             choices = unique(APIM$SEX),
-                             selected = "ALL"),
+                 fluidRow(column(6, selectInput("overviewAge",
+                                                "Age group:",
+                                                choices = unique(APIM$AGE),
+                                                selected = "All")),
+                          column(6, selectInput("overviewSex",
+                                                "Sex:",
+                                                choices = unique(APIM$SEX),
+                                                selected = "ALL"))),
                  selectInput("demoProv",
                              "Province of residence:",
                              choices = unique(APIM$PROV_RES),
@@ -231,48 +240,51 @@ server <- function(input, output, session) {
                          VAR == input$overviewVar &
                          CLASS_FLAG == input$overviewClass &
                          AGE == input$overviewAge &
-                         SEX == "ALL" &
+                         SEX == input$overviewSex &
                          PROV_RES %in% input$overviewProv)
     return(overview)
   })
   
-  output$overviewMean <- renderPlot({
+  output$overviewMean <- renderGirafe({
     input$overviewUpdate
-    isolate({ggplot(overviewDataFile()) + 
-              geom_col(aes(x=PROV_RES, y= MEAN, fill = FILE), width=0.8, position = "dodge") + 
-              theme_classic() + 
-              scale_fill_jama() +
-              scale_y_continuous(labels = comma) + 
-              theme(legend.position = "bottom") + 
-              labs(title=paste0("Mean ", input$overviewVar, " by province and file, ", input$overviewYear), 
-                   fill = NULL,
-                   subtitle = paste0("Class: ", input$overviewClass, "; Age: ", input$overviewAge))})
+    isolate({overviewMeanPlot <- ggplot(overviewDataFile()) + 
+                                  geom_col_interactive(aes(x=PROV_RES, y= MEAN, fill = FILE, tooltip=paste0(FILE, ": ", MEAN)), width=0.8, position = "dodge") + 
+                                  theme_classic() + 
+                                  scale_fill_jama() +
+                                  scale_y_continuous(labels = comma) + 
+                                  theme(legend.position = "bottom") + 
+                                  labs(title=paste0("Mean ", input$overviewVar, " by province and file, ", input$overviewYear), 
+                                       fill = NULL,
+                                       subtitle = paste0("Class: ", input$overviewClass, "; Age: ", input$overviewAge, "; Sex: ", input$overviewSex))
+            girafe(ggobj = overviewMeanPlot, width_svg = 7, height_svg = 6)})
   })
   
-  output$overviewNGWT <- renderPlot({
+  output$overviewNGWT <- renderGirafe({
     input$overviewUpdate
-    isolate({ggplot(overviewDataFile()) + 
-              geom_col(aes(x=PROV_RES, y= NWGT, fill = FILE), width=0.8, position = "dodge") + 
-              theme_classic() + 
-              scale_fill_jama() +
-              scale_y_continuous(labels = comma) + 
-              theme(legend.position = "bottom") + 
-              labs(title=paste0("NWGT ", input$overviewVar, " by province and file, ", input$overviewYear), 
-                   fill = NULL,
-                   subtitle = paste0("Class: ", input$overviewClass, "; Age: ", input$overviewAge))})
+    isolate({overviewNWGTPlot <- ggplot(overviewDataFile()) + 
+                                  geom_col_interactive(aes(x=PROV_RES, y= NWGT, fill = FILE, tooltip=paste0(FILE, ": ", NWGT)), width=0.8, position = "dodge") + 
+                                  theme_classic() + 
+                                  scale_fill_jama() +
+                                  scale_y_continuous(labels = comma) + 
+                                  theme(legend.position = "bottom") + 
+                                  labs(title=paste0("NWGT ", input$overviewVar, " by province and file, ", input$overviewYear), 
+                                       fill = NULL,
+                                       subtitle = paste0("Class: ", input$overviewClass, "; Age: ", input$overviewAge, "; Sex: ", input$overviewSex))
+            girafe(ggobj = overviewNWGTPlot, width_svg = 7, height_svg = 6)})
   })
 
-  output$overviewP50 <- renderPlot({
+  output$overviewP50 <- renderGirafe({
     input$overviewUpdate
-    isolate({ggplot(overviewDataFile()) + 
-              geom_col(aes(x=PROV_RES, y= P_50, fill = FILE), width=0.8, position = "dodge") + 
-              theme_classic() + 
-              scale_fill_jama() +
-              scale_y_continuous(labels = comma) + 
-              theme(legend.position = "bottom") + 
-              labs(title=paste0("P_50 ", input$overviewVar, " by province and file, ", input$overviewYear), 
-                   fill = NULL,
-                   subtitle = paste0("Class: ", input$overviewClass, "; Age: ", input$overviewAge))})
+    isolate({overviewP50Plot <- ggplot(overviewDataFile()) + 
+                                  geom_col_interactive(aes(x=PROV_RES, y= P_50, fill = FILE, tooltip=paste0(FILE, ": ", P_50)), width=0.8, position = "dodge") + 
+                                  theme_classic() + 
+                                  scale_fill_jama() +
+                                  scale_y_continuous(labels = comma) + 
+                                  theme(legend.position = "bottom") + 
+                                  labs(title=paste0("P_50 ", input$overviewVar, " by province and file, ", input$overviewYear), 
+                                       fill = NULL,
+                                       subtitle = paste0("Class: ", input$overviewClass, "; Age: ", input$overviewAge, "; Sex: ", input$overviewSex))
+            girafe(ggobj = overviewP50Plot, width_svg = 7, height_svg = 6)})
   })
   
   output$overviewData <- renderDataTable({
