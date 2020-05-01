@@ -115,60 +115,87 @@ write.csv(CISPlus_tab_2018, file = "data/CISPlus_tab_2018.csv", row.names = F, n
 
 
 # Create dummy percentile file
+percentiles <- c("P_0", "P_02", "P_04", "P_06", "P_08", "P_10", "P_12", "P_14", "P_16", "P_18", "P_20", "P_22",
+                 "P_24", "P_26", "P_28", "P_30", "P_32", "P_34", "P_36", "P_38", "P_40", "P_42", "P_44", "P_46",
+                 "P_48", "P_50", "P_52", "P_54", "P_56", "P_58", "P_60", "P_62", "P_64", "P_66", "P_68", "P_70",
+                 "P_72", "P_74", "P_76", "P_78", "P_80", "P_82", "P_84", "P_86", "P_88", "P_90", "P_92", "P_94",
+                 "P_96", "P_98", "P_100")
 
+#FILE <- c("APIM", "CIS", "CISPlus", "CHS", "SHS")
+percentile_vars <- c("VAR", "CLASS_FLAG", "PROV_RES", "SEX", "AGE", "WITH_VAL_0")
 
-# multi source comparison - CIS, T1FF, APIM
-# # Create a dummy file containing all combinations of levels of each variable and dummy data in the statistics columns
-# vars <- c("source", "variable", "population", "prov", "decile_flag", "AGE", "sex")
-# stats <- c("n",	"min",	"max",	"sum",	"p5",	"p10",	"p25",	"p50",	"p75",	"p90",	"p95",	"p99")
-# 
-# # Levels of each variable
-# source <- c("CIS", "apim", "t1ff")
-# 
-# variable	<- c("CHDBN", "CHDBN_BCCTB", "CHDBN_CCTB", "CHDBN_CDB", "CHDBN_FED", "CHDBN_NCBS",
-#               "CHDBN_PROV", "CHDBN_UCCB", "CQPPB", "CQPPB_DISAB", "CQPPB_POSTRETIR", "CQPPB_REGRETIR",
-#               "CQPPB_RETIR", "CQPPB_SURVIVOR", "EIBEN", "EIBEN_OTH", "EIBEN_REG", "ELG_DIVND", "EMPIN",
-#               "GTR", "INCTAX", "INCTAX_NFED", "INCTAX_PT", "INVST", "INVST_DIV", "INVST_LTPI", "INVST_OTHER",
-#               "INVST_RENT", "MRKINC", "NELG_DIVND", "OASGIS", "OASGIS_GIS", "OASGIS_OAS", "OASGIS_REPAY",
-#               "OGOVTR", "OGOVTR_GHSTC", "OGOVTR_NIE", "OGOVTR_PRSUPP", "OGOVTR_PRTXCR", "OGOVTR_SOCASSIST",
-#               "OGOVTR_WITB", "OGOVTR_WRKCOMP", "OTINC", "OTINC_ALIMO", "OTINC_BURSARY", "OTINC_NIE", "OTINC_RDSP",
-#               "RETIR", "RETIR_PRIV_PENSION_INC", "RETIR_RRSP_INC", "RRSP_TRANSFER", "SEI", "SEI_BUS", "SEI_COM",
-#               "SEI_EXIND", "SEI_FARM", "SEI_FISH", "SEI_NONFARM", "SEI_PRF", "TAXABLE_ALIMONY_T1", "TAXABLE_DIVND",
-#               "TOTAL_ALIMONY_T1", "TOTINC", "TOTINC_AT", "WAGES", "WAGES_EARN_T4", "WAGES_EXIND", "WAGES_OTHER_EMPT_INC")
-# 
-# population <- c("all", "recipient")	
-# 
-# prov <- c("", "93", "CANADA", "10 NL", "11 PE", "12 NS", "13 NB", "24 QC", "35 ON",
-#           "46 MB", "47 SK", "48 AB", "59 BC", "60 YT", "61 NT", "62 NU", "Don't Know", "Interim Processing Code", "Not Applicable")
-# 
-# decile_flag <- c("", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
-# 
-# AGE	<- c("", "0-14", "15+", "15-19", "15-24", "20-24", "25-34", "25-54", "25-64",
-#          "35-44", "45-54", "55-59", "55-64", "60-64", "65+", "65-69", "70-74", "75+")
-# 
-# sex <- c("", "1", "2", "99")
-# 
-# # Create all possible combinations
-# multicomp_combinations <- as.data.frame(expand.grid(source, variable, population, prov, decile_flag, AGE, sex, 
-#                                                     KEEP.OUT.ATTRS = F))
-# colnames(multicomp_combinations) <- vars
-# 
-# # Create a couple years
-# multicomp_dummy_2017 <- multicomp_combinations
-# multicomp_dummy_2017$year <- 2017
-# 
-# multicomp_dummy_2016 <- multicomp_combinations
-# multicomp_dummy_2016$year <- 2016
-# 
-# # Create columns for statistics
-# for (i in stats) {
-#   multicomp_dummy_2017[i] <- floor(runif(nrow(multicomp_dummy_2017), max = 1000))
-#   multicomp_dummy_2016[i] <- floor(runif(nrow(multicomp_dummy_2016), max = 1000))
-# }
-# 
-# # Output the dummy files as csv
-# write.csv(multicomp_dummy_2016, file = "data/multicomp_dummy_2016.csv", row.names = F, na = "")
-# write.csv(multicomp_dummy_2017, file = "data/multicomp_dummy_2017.csv", row.names = F, na = "")
+percentiles_combinations <- as.data.frame(expand.grid(var, class_flag, prov_res, sex, age, WITH_VAL_0, KEEP.OUT.ATTRS = F))
+colnames(percentiles_combinations) <- percentile_vars
 
+APIM_percentiles_2017 <- percentiles_combinations
+APIM_percentiles_2017$year <- 2017
+APIM_percentiles_2017$FILE <- "APIM"
 
+APIM_percentiles_2018 <- percentiles_combinations
+APIM_percentiles_2018$year <- 2018
+APIM_percentiles_2018$FILE <- "APIM"
 
+CIS_percentiles_2017 <- percentiles_combinations
+CIS_percentiles_2017$year <- 2017
+CIS_percentiles_2017$FILE <- "CIS"
+
+CIS_percentiles_2018 <- percentiles_combinations
+CIS_percentiles_2018$year <- 2018
+CIS_percentiles_2018$FILE <- "CIS"
+
+CISPlus_percentiles_2017 <- percentiles_combinations
+CISPlus_percentiles_2017$year <- 2017
+CISPlus_percentiles_2017$FILE <- "CISPlus"
+
+CISPlus_percentiles_2018 <- percentiles_combinations
+CISPlus_percentiles_2018$year <- 2018
+CISPlus_percentiles_2018$FILE <- "CISPlus"
+
+CHS_percentiles_2017 <- percentiles_combinations
+CHS_percentiles_2017$year <- 2017
+CHS_percentiles_2017$FILE <- "CHS"
+
+CHS_percentiles_2018 <- percentiles_combinations
+CHS_percentiles_2018$year <- 2018
+CHS_percentiles_2018$FILE <- "CHS"
+
+SHS_percentiles_2017 <- percentiles_combinations
+SHS_percentiles_2017$year <- 2017
+SHS_percentiles_2017$FILE <- "SHS"
+
+SHS_percentiles_2018 <- percentiles_combinations
+SHS_percentiles_2018$year <- 2018
+SHS_percentiles_2018$FILE <- "SHS"
+
+for (i in 1:51) {
+  APIM_percentiles_2017[percentiles[i]] <- runif(n=nrow(APIM_percentiles_2017), min = 0.75, max = 1.5)*(i^2)
+  APIM_percentiles_2018[percentiles[i]] <- runif(n=nrow(APIM_percentiles_2018), min = 0.75, max = 1.5)*(i^2)
+  
+  CIS_percentiles_2017[percentiles[i]] <- runif(n=nrow(CIS_percentiles_2017), min = 0.75, max = 1.5)*(i^2)
+  CIS_percentiles_2018[percentiles[i]] <- runif(n=nrow(CIS_percentiles_2018), min = 0.75, max = 1.5)*(i^2)
+  
+  CISPlus_percentiles_2017[percentiles[i]] <- runif(n=nrow(CISPlus_percentiles_2017), min = 0.75, max = 1.5)*(i^2)
+  CISPlus_percentiles_2018[percentiles[i]] <- runif(n=nrow(CISPlus_percentiles_2018), min = 0.75, max = 1.5)*(i^2)
+   
+  CHS_percentiles_2017[percentiles[i]] <- runif(n=nrow(CHS_percentiles_2017), min = 0.75, max = 1.5)*(i^2)
+  CHS_percentiles_2018[percentiles[i]] <- runif(n=nrow(CHS_percentiles_2018), min = 0.75, max = 1.5)*(i^2)
+  
+  SHS_percentiles_2017[percentiles[i]] <- runif(n=nrow(SHS_percentiles_2017), min = 0.75, max = 1.5)*(i^2)
+  SHS_percentiles_2018[percentiles[i]] <- runif(n=nrow(SHS_percentiles_2018), min = 0.75, max = 1.5)*(i^2)
+}
+
+# Output the dummy files as csv
+write.csv(APIM_percentiles_2017, file = "data/APIM_percentiles_2017.csv", row.names = F, na = "")
+write.csv(APIM_percentiles_2018, file = "data/APIM_percentiles_2018.csv", row.names = F, na = "")
+
+write.csv(CIS_percentiles_2017, file = "data/CIS_percentiles_2017.csv", row.names = F, na = "")
+write.csv(CIS_percentiles_2018, file = "data/CIS_percentiles_2018.csv", row.names = F, na = "")
+
+write.csv(CISPlus_percentiles_2017, file = "data/CISPlus_percentiles_2017.csv", row.names = F, na = "")
+write.csv(CISPlus_percentiles_2018, file = "data/CISPlus_percentiles_2018.csv", row.names = F, na = "")
+
+write.csv(CHS_percentiles_2017, file = "data/CHS_percentiles_2017.csv", row.names = F, na = "")
+write.csv(CHS_percentiles_2018, file = "data/CHS_percentiles_2018.csv", row.names = F, na = "")
+
+write.csv(SHS_percentiles_2017, file = "data/SHS_percentiles_2017.csv", row.names = F, na = "")
+write.csv(SHS_percentiles_2018, file = "data/SHS_percentiles_2018.csv", row.names = F, na = "")

@@ -1,4 +1,4 @@
-#install.packages(c("dplyr", "shiny", "shinyWidgets", "ggplot2", "scales", "shinythemes", "shinydashboardPlus", "DT", "ggsci", "plotly", "ggiraph"))
+#install.packages(c("dplyr", "shiny", "shinyWidgets", "ggplot2", "scales", "shinythemes", "shinydashboardPlus", "DT", "ggsci", "plotly", "ggiraph", "reshape2"))
 
 require(dplyr)
 require(shiny)
@@ -10,12 +10,13 @@ require(shinydashboardPlus)
 require(DT)
 require(ggsci)
 require(ggiraph)
+require(reshape2)
+
 
 # Read in the data
-read_data <- function (filename) {
+read_data <- function (filename, vars_select) {
   dat <- subset(read.csv(paste0("data/", filename, ".csv"), head=T, sep=","), 
-                select = c("year", "FILE", "PROV_RES", "VAR", "CLASS_FLAG", "SEX", "AGE", "WITH_VAL_0", "N", "MEAN", "NWGT", "SUM", 
-                           "P25", "P75", "P_0", "P_10", "P_20", "P_30", "P_40", "P_50", "P_60", "P_70", "P_80", "P_90", "P_100"))
+                select = vars_select)
   
   dat$CLASS_FLAG <- factor(dat$CLASS_FLAG, levels = c("ALL", "1", "2", "3", "4", "5"))
   dat$PROV_RES <- factor(dat$PROV_RES, levels = c("ALL", "NL", "PE", "NS", "NB", "QC", "ON", "MB", "SK", "AB", "BC", "YT", "NT", "NU"))
@@ -25,12 +26,36 @@ read_data <- function (filename) {
   return(dat)
 }
 
-APIM <<- rbind(read_data("APIM_tab_2017"), read_data("APIM_tab_2018"))
-CHS <<- rbind(read_data("CHS_tab_2017"), read_data("CHS_tab_2018"))
-CIS <<- rbind(read_data("CIS_tab_2017"), read_data("CIS_tab_2018"))
-CISPlus <<- rbind(read_data("CISPlus_tab_2017"), read_data("CISPlus_tab_2018"))
-SHS <<- rbind(read_data("SHS_tab_2017"), read_data("SHS_tab_2018"))
+data_vars <- c("year", "FILE", "PROV_RES", "VAR", "CLASS_FLAG", "SEX", "AGE", "WITH_VAL_0", "N", "MEAN", "NWGT", "SUM", 
+               "P25", "P75", "P_0", "P_10", "P_20", "P_30", "P_40", "P_50", "P_60", "P_70", "P_80", "P_90", "P_100")
 
+percentile_vars <- c("year", "FILE", "PROV_RES", "VAR", "CLASS_FLAG", "SEX", "AGE", "WITH_VAL_0", 
+                     "P_0", "P_02", "P_04", "P_06", "P_08", "P_10", "P_12", "P_14", "P_16", "P_18", "P_20", "P_22",
+                     "P_24", "P_26", "P_28", "P_30", "P_32", "P_34", "P_36", "P_38", "P_40", "P_42", "P_44", "P_46",
+                     "P_48", "P_50", "P_52", "P_54", "P_56", "P_58", "P_60", "P_62", "P_64", "P_66", "P_68", "P_70",
+                     "P_72", "P_74", "P_76", "P_78", "P_80", "P_82", "P_84", "P_86", "P_88", "P_90", "P_92", "P_94",
+                     "P_96", "P_98", "P_100")
+
+APIM <<- rbind(read_data("APIM_tab_2017", data_vars), read_data("APIM_tab_2018", data_vars))
+CHS <<- rbind(read_data("CHS_tab_2017", data_vars), read_data("CHS_tab_2018", data_vars))
+CIS <<- rbind(read_data("CIS_tab_2017"), read_data("CIS_tab_2018", data_vars))
+CISPlus <<- rbind(read_data("CISPlus_tab_2017", data_vars), read_data("CISPlus_tab_2018", data_vars))
+SHS <<- rbind(read_data("SHS_tab_2017", data_vars), read_data("SHS_tab_2018", data_vars))
+
+APIM_percentiles_2017 <<- read_data("APIM_percentiles_2017", percentile_vars)
+APIM_percentiles_2018 <<- read_data("APIM_percentiles_2018", percentile_vars)
+
+CIS_percentiles_2017 <<- read_data("CIS_percentiles_2017", percentile_vars)
+CIS_percentiles_2018 <<- read_data("CIS_percentiles_2018", percentile_vars)
+
+CISPlus_percentiles_2017 <<- read_data("CISPlus_percentiles_2017", percentile_vars)
+CISPlus_percentiles_2018 <<- read_data("CISPlus_percentiles_2018", percentile_vars)
+
+CHS_percentiles_2017 <<- read_data("CHS_percentiles_2017", percentile_vars)
+CHS_percentiles_2018 <<- read_data("CHS_percentiles_2018", percentile_vars)
+
+SHS_percentiles_2017 <<- read_data("SHS_percentiles_2017", percentile_vars)
+SHS_percentiles_2018 <<- read_data("SHS_percentiles_2018", percentile_vars)
 
 # Set up the UI
 ui <- (fluidPage(
@@ -125,11 +150,11 @@ ui <- (fluidPage(
                              "Class flag:",
                              choices = unique(APIM$CLASS_FLAG),
                              selected = "ALL"),
-                 fluidRow(column(6, selectInput("overviewAge",
+                 fluidRow(column(6, selectInput("percentileAge",
                                                 "Age group:",
                                                 choices = unique(APIM$AGE),
                                                 selected = "All")),
-                          column(6, selectInput("overviewSex",
+                          column(6, selectInput("percentileSex",
                                                 "Sex:",
                                                 choices = unique(APIM$SEX),
                                                 selected = "ALL"))),
@@ -144,9 +169,8 @@ ui <- (fluidPage(
                ),
                mainPanel(
                  width = 10,
-                 fluidRow(wellPanel(p("percentiles plot"),
-                                    plotOutput("percentilePlot"))),
-                 fluidRow(boxPlus(title = "percentile data table",
+                 fluidRow(girafeOutput("percentilePlot")),
+                 fluidRow(boxPlus(title = "Data table",
                                   closable= F,
                                   collapsible = T,
                                   collapsed = T,
@@ -182,11 +206,11 @@ ui <- (fluidPage(
                              "Class flag:",
                              choices = unique(APIM$CLASS_FLAG),
                              selected = "ALL"),
-                 fluidRow(column(6, selectInput("overviewAge",
+                 fluidRow(column(6, selectInput("demoge",
                                                 "Age group:",
                                                 choices = unique(APIM$AGE),
                                                 selected = "All")),
-                          column(6, selectInput("overviewSex",
+                          column(6, selectInput("demoSex",
                                                 "Sex:",
                                                 choices = unique(APIM$SEX),
                                                 selected = "ALL"))),
@@ -296,8 +320,54 @@ server <- function(input, output, session) {
   
 ### Percentiles page
   
+  # Create data file
+  percentilesDataFile <- reactive({
+    percentile_files <- c()
+    for (f in input$percentileFiles) {
+      percentile_files <- c(percentile_files, paste0(f, "_percentiles_", input$percentileYear))
+    }
+    full_percent_data <- do.call("rbind", lapply(percentile_files, get))
+    percent_data <- subset(full_percent_data,
+                               VAR == input$percentileVar &
+                               CLASS_FLAG == input$percentileClass &
+                               AGE == input$percentileAge &
+                               SEX == input$percentileSex &
+                               PROV_RES == input$percentileProv)
+    percent_data_t <- reshape2::melt(percent_data, id = c("year", "FILE", "VAR", "CLASS_FLAG", "AGE", "SEX", "PROV_RES", "WITH_VAL_0"))
+    return(percent_data_t)
+  })
+  
+  # Create percentiles plot
+  output$percentilePlot <- renderGirafe({
+    input$percentileUpdate
+    isolate({
+      percentPlot <- ggplot(percentilesDataFile()) + 
+                      geom_line(aes(x = variable, y = value, colour = FILE, group = FILE), size = 1.25) +
+                      geom_point_interactive(aes(x = variable, y = value, colour = FILE, tooltip = paste0(FILE, " ", variable, ": ", round(value, 0.2))), size = 0.5) +
+                      theme_classic() + 
+                      scale_colour_jama() +
+                      scale_y_continuous(labels = comma) + 
+                      theme(legend.position = "bottom", axis.text.x=element_blank(), axis.ticks.x=element_blank()) + 
+                      labs(title=paste0("Percentiles of ", input$percentileVar, " by file, ", input$percentileYear), 
+                           fill = NULL,
+                           x = "Percentiles",
+                           y = input$percentileVar,
+                           subtitle = paste0("Province: ", input$percentileProv, "; Class: ", input$percentileClass, 
+                                             "; Age: ", input$percentileAge, "; Sex: ", input$percentileSex))
+      girafe(ggobj = percentPlot, width_svg = 18, height_svg = 6)
+    })
+  })
+  
+  output$percentileData <- renderDataTable({
+    input$percentileUpdate
+    isolate({DT::datatable(subset(percentilesDataFile()[order(percentilesDataFile()$PROV_RES),], 
+                                  select = c("PROV_RES", "FILE", "variable", "value"),
+                                  variable %in% c("P_0", "P_10", "P_20", "P_30", "P_40", "P_50", "P_60", "P_70", "P_80", "P_90", "P_100")), 
+                           options=list(paging = F, searching=F, scrollX = TRUE, scrollY = "400px"), rownames=F)})
+  })
   
 ### Demographics page
+  
   
   
 }
