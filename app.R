@@ -1,4 +1,5 @@
-#install.packages(c("dplyr", "shiny", "shinyWidgets", "ggplot2", "scales", "shinythemes", "shinydashboardPlus", "DT", "ggsci", "plotly", "ggiraph", "reshape2"))
+#install.packages(c("dplyr", "shiny", "shinyWidgets", "ggplot2", "scales", "shinythemes", "shinydashboardPlus", 
+#"DT", "ggsci", "plotly", "ggiraph", "reshape2", "data.table"))
 
 require(dplyr)
 require(shiny)
@@ -11,11 +12,12 @@ require(DT)
 require(ggsci)
 require(ggiraph)
 require(reshape2)
+require(data.table)
 
 
 # Read in the data
 read_data <- function (filename, vars_select) {
-  dat <- subset(read.csv(paste0("data/", filename, ".csv"), head=T, sep=","), 
+  dat <- subset(fread(paste0("data/", filename, ".csv"), sep=",", data.table = FALSE), 
                 select = vars_select)
   
   dat$CLASS_FLAG <- factor(dat$CLASS_FLAG, levels = c("ALL", "1", "2", "3", "4", "5"))
@@ -374,4 +376,6 @@ server <- function(input, output, session) {
 
 # Call the shiny function
 shinyApp(ui, server)
+
+
 
