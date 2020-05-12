@@ -264,52 +264,70 @@ ui <- (fluidPage(
     
     ### Demographics page
     tabPanel("Demographics",
-             sidebarLayout(
-               sidebarPanel(
-                 width = 2,
-                 selectInput(
-                   "demoFiles",
-                   "Select files to compare:",
-                   choices = c("APIM", "CIS", "CISPlus", "CHS", "SHS"),
-                   selected = c("APIM", "CIS", "CISPlus", "CHS", "SHS"),
-                   multiple = T
-                 ),
-                 radioButtons(
-                   "demoYear",
-                   "Year:",
-                   choices = seq(minYear, maxYear, 1),
-                   selected = maxYear
-                 ),
-                 selectInput(
-                   "demoVar",
-                   "Variable:",
-                   choices = unique(APIM$VAR),
-                   selected = "TOTINC"
-                 ),
-                 selectInput(
-                   "demoStat",
-                   "Statistic:",
-                   choices = c("N", "MEAN", "NWGT", "SUM", "P25", "P75", "P_0", "P_10", "P_20", "P_30", 
-                                "P_40", "P_50", "P_60", "P_70", "P_80", "P_90", "P_100"),
-                   selected = "MEAN"
-                 ),
-                 selectInput(
-                   "demoClass",
-                   "Class flag:",
-                   choices = c("ALL", "1", "2", "3", "4", "5"),
-                   selected = "ALL"
-                 ),
-                 fluidRow(column(
-                   6,
-                   selectInput(
-                     "demoge",
-                     "Age group:",
-                     choices = c("All", "0-14", "15-19", "20-24", "25-34", "35-44", "45-54", "55-64", "65+", "Not Stated"),
-                     selected = "All"
-                   )
-                 ),
-                 column(
-                   6,
+          fluidPage(
+            dropdownButton(
+              circle = TRUE,
+              status = "primary",
+              icon = icon("gear"),
+              tooltip = tooltipOptions(title = "Click to open inputs"),
+              radioGroupButtons(
+                "demoYear",
+                "Year:",
+                choices = seq(minYear, maxYear, 1),
+                selected = maxYear,
+                status = "primary",
+                individual = TRUE
+              ),
+              selectInput(
+                "demoFiles",
+                "Select files to compare:",
+                choices = filesList,
+                selected = filesList,
+                multiple = T
+              ),
+              fluidRow(
+                column(6,
+                       selectInput(
+                         "demoVar",
+                         "Variable:",
+                         choices = unique(APIM$VAR),
+                         selected = "TOTINC"
+                       )),
+                column(6,
+                       selectInput(
+                         "demoStat",
+                         "Statistic:",
+                         choices = c("N", "MEAN", "NWGT", "SUM", "P25", "P75", "P_0", "P_10", "P_20", "P_30", 
+                                     "P_40", "P_50", "P_60", "P_70", "P_80", "P_90", "P_100"),
+                         selected = "MEAN"
+                       ))
+              ),
+              fluidRow(
+                column(6,             
+                       selectInput(
+                          "demoProv",
+                          "Province of residence:",
+                          choices = c("ALL", "NL", "PE", "NS", "NB", "QC", "ON", "MB", "SK", "AB", "BC", "YT", "NT", "NU", "99"),
+                          selected = "ALL"
+                        )),
+                column(6,
+                       selectInput(
+                          "demoClass",
+                          "Class flag:",
+                          choices = c("ALL", "1", "2", "3", "4", "5"),
+                          selected = "ALL"
+                        ))
+              ),
+              fluidRow(
+                column(6,
+                  selectInput(
+                   "demoge",
+                   "Age group:",
+                   choices = c("All", "0-14", "15-19", "20-24", "25-34", "35-44", "45-54", "55-64", "65+", "Not Stated"),
+                   selected = "All"
+                  )
+                ),
+                column(6,
                    selectInput(
                      "demoSex",
                      "Sex:",
@@ -317,42 +335,35 @@ ui <- (fluidPage(
                      selected = "ALL"
                    )
                  )),
-                 selectInput(
-                   "demoProv",
-                   "Province of residence:",
-                   choices = c("ALL", "NL", "PE", "NS", "NB", "QC", "ON", "MB", "SK", "AB", "BC", "YT", "NT", "NU", "99"),
-                   selected = "ALL"
-                 ),
-                 actionButton(
-                   "demoUpdate",
-                   label = "Update",
-                   width = "100%",
-                   class = "btn btn-primary btn-custom"
-                 )
-               ),
-               mainPanel(
-                 width = 10,
-                 fluidRow(column(6, wellPanel(
+             actionButton(
+               "demoUpdate",
+                label = "Update",
+                width = "100%",
+                class = "btn btn-primary btn-custom"
+              )
+            ),
+            fluidRow(
+              column(4, wellPanel(
+                p("year plot"),
+                plotOutput("demoYearPlot")
+              )),
+              column(4, wellPanel(p("sex plot"),
+                                  plotOutput("demoSexPlot"))),
+              column(4, wellPanel(
+                p("class plot"),
+                plotOutput("demoClassPlot")
+              ))
+            ),
+            fluidRow(column(6, wellPanel(
                    p("prov plot"),
                    plotOutput("demoProvPlot")
                  )),
                  column(6, wellPanel(
                    p("age plot"),
                    plotOutput("demoAgePlot")
-                 ))),
-                 fluidRow(
-                   column(4, wellPanel(
-                     p("year plot"),
-                     plotOutput("demoYearPlot")
-                   )),
-                   column(4, wellPanel(p("sex plot"),
-                                       plotOutput("demoSexPlot"))),
-                   column(4, wellPanel(
-                     p("class plot"),
-                     plotOutput("demoClassPlot")
-                   ))
-                 ),
-                 fluidRow(
+                 ))
+              ),
+              fluidRow(
                    boxPlus(
                      title = "demographic data table",
                      closable = F,
@@ -363,7 +374,6 @@ ui <- (fluidPage(
                      dataTableOutput("demoData")
                    )
                  )
-               )
              ))
   )
     ))
