@@ -90,7 +90,7 @@ ui <- (fluidPage(
                    width = 6,
                    selectInput(
                      "overviewFiles",
-                     "Select files to compare:",
+                     "Files to compare:",
                      choices = filesList,
                      selected = filesList,
                      multiple = T
@@ -189,7 +189,7 @@ ui <- (fluidPage(
             width = 6,
             selectInput(
               "percentileFiles",
-              "Select files to compare:",
+              "Files to compare:",
               choices = filesList,
               selected = filesList,
               multiple = T
@@ -280,7 +280,7 @@ ui <- (fluidPage(
               ),
               selectInput(
                 "demoFiles",
-                "Select files to compare:",
+                "Files to compare:",
                 choices = filesList,
                 selected = filesList,
                 multiple = T
